@@ -1,0 +1,185 @@
+object Form1: TForm1
+  Left = 200
+  Height = 581
+  Top = 148
+  Width = 804
+  ActiveControl = EditRegex
+  Caption = 'regex dump'
+  ClientHeight = 581
+  ClientWidth = 804
+  OnCreate = FormCreate
+  Position = poScreenCenter
+  LCLVersion = '2.1.0.0'
+  object ListDump: TListBox
+    Left = 6
+    Height = 340
+    Top = 235
+    Width = 792
+    Align = alClient
+    BorderSpacing.Around = 6
+    Font.Pitch = fpFixed
+    ItemHeight = 0
+    ParentFont = False
+    ScrollWidth = 790
+    TabOrder = 3
+    TopIndex = -1
+  end
+  object ListRes: TListBox
+    Left = 6
+    Height = 120
+    Top = 109
+    Width = 792
+    Align = alTop
+    BorderSpacing.Around = 6
+    ItemHeight = 0
+    ScrollWidth = 790
+    TabOrder = 2
+    TopIndex = -1
+  end
+  object Panel1: TPanel
+    Left = 0
+    Height = 64
+    Top = 0
+    Width = 804
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 64
+    ClientWidth = 804
+    TabOrder = 0
+    object Label1: TLabel
+      AnchorSideLeft.Control = Panel1
+      AnchorSideTop.Control = EditRegex
+      AnchorSideTop.Side = asrCenter
+      Left = 6
+      Height = 17
+      Top = 11
+      Width = 45
+      BorderSpacing.Left = 6
+      Caption = '&RegEx:'
+      FocusControl = EditRegex
+      ParentColor = False
+    end
+    object EditRegex: TEdit
+      AnchorSideLeft.Control = Label1
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = Panel1
+      AnchorSideRight.Control = Panel1
+      AnchorSideRight.Side = asrBottom
+      Left = 57
+      Height = 26
+      Top = 6
+      Width = 741
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 6
+      BorderSpacing.Top = 6
+      BorderSpacing.Right = 6
+      OnChange = EditRegexChange
+      TabOrder = 0
+    end
+    object chk_i: TCheckBox
+      AnchorSideLeft.Control = EditRegex
+      AnchorSideTop.Control = EditRegex
+      AnchorSideTop.Side = asrBottom
+      Left = 57
+      Height = 24
+      Top = 32
+      Width = 119
+      Caption = '&i (case-insens)'
+      OnChange = chk_iChange
+      TabOrder = 1
+    end
+    object chk_x: TCheckBox
+      AnchorSideLeft.Control = chk_i
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = chk_i
+      Left = 182
+      Height = 24
+      Top = 32
+      Width = 117
+      BorderSpacing.Left = 6
+      Caption = '&x (comments)'
+      OnChange = chk_iChange
+      TabOrder = 2
+    end
+    object chk_r: TCheckBox
+      AnchorSideLeft.Control = chk_x
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = chk_i
+      Left = 305
+      Height = 24
+      Top = 32
+      Width = 66
+      BorderSpacing.Left = 6
+      Caption = 'r (rus)'
+      OnChange = chk_iChange
+      TabOrder = 3
+    end
+    object chk_s: TCheckBox
+      AnchorSideLeft.Control = chk_r
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = chk_i
+      Left = 377
+      Height = 24
+      Top = 32
+      Width = 113
+      BorderSpacing.Left = 6
+      Caption = '&s (dot for all)'
+      OnChange = chk_iChange
+      TabOrder = 4
+    end
+    object chk_g: TCheckBox
+      AnchorSideLeft.Control = chk_s
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = chk_i
+      Left = 496
+      Height = 24
+      Top = 32
+      Width = 72
+      BorderSpacing.Left = 6
+      Caption = '&greedy'
+      OnChange = chk_iChange
+      TabOrder = 5
+    end
+  end
+  object Panel2: TPanel
+    Left = 0
+    Height = 39
+    Top = 64
+    Width = 804
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 39
+    ClientWidth = 804
+    TabOrder = 1
+    object Label2: TLabel
+      AnchorSideLeft.Control = Panel2
+      AnchorSideTop.Control = Panel2
+      AnchorSideTop.Side = asrCenter
+      Left = 6
+      Height = 17
+      Top = 11
+      Width = 32
+      BorderSpacing.Left = 6
+      Caption = '&Text:'
+      FocusControl = EditText
+      ParentColor = False
+    end
+    object EditText: TEdit
+      AnchorSideLeft.Control = Label2
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = Panel2
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = Panel2
+      AnchorSideRight.Side = asrBottom
+      Left = 44
+      Height = 26
+      Top = 6
+      Width = 754
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 6
+      BorderSpacing.Right = 6
+      OnChange = EditRegexChange
+      TabOrder = 0
+    end
+  end
+end
