@@ -84,6 +84,27 @@ end;
 
 ---
 
+## Security Advisories（后续发现）
+
+本仓库在修复 CVE-2024-23692（`search` 参数入口）之后，继续对 HFS 2.x 的模板引擎做了审计，
+发现 **三处相互独立、均可在 2.4.0 RC7 上未认证利用的缺陷**。三者根因、修复点、影响维度各不相同：
+
+| Advisory | 缺陷 | 弱点类型 | 入口 / 位置 | 修其他两条能否关掉它 |
+|---|---|---|---|---|
+| [WGETNZ-HFS2-2026-001](advisories/hfs2-upload-filename-template-injection/README.md) | 模板注入 → 未授权 RCE | CWE-1336（次 CWE-94） | multipart 上传文件名（`%item-resource%`，`main.pas:3897`） | 否 |
+| [WGETNZ-HFS2-2026-002](advisories/hfs2-template-macro-missing-authorization/README.md) | 特权宏鉴权缺失 → 任意文件读/写/删 | CWE-862（次 CWE-22） | 宏分发器无鉴权 + `uri2diskMaybe()` 原样返回绝对路径 | 否 |
+| [WGETNZ-HFS2-2026-003](advisories/hfs2-getini-infinite-loop-dos/README.md) | 未授权拒绝服务 → 非终止循环占满服务线程 | CWE-835 | `{.get ini.}` 的配置查找 `getKeyFromString()`（`utillib.pas:2846`） | 否 |
+
+001 与 CVE-2024-23692 的区别：入口点不同、未转义汇点不同，且该 CVE 公布范围是 `<= 2.3m`，**不含 2.4.0 RC7**。
+001 与 002 的区别：001 是入口点问题（注入），002 是控制缺失（宏分发器无鉴权模型），002 在任何注入被修复后依然存在。
+003 影响的是**可用性**，与 001/002 的机密性/完整性维度不同。
+
+三份 advisory 均附可运行的 PoC（nuclei 模板 / Python 脚本，只读优先、内置 Burp 代理开关），修复建议见各自第 5 节。
+
+> 已于 2026-09-16 向 CNA 提交，编号分配后更新。
+
+---
+
 ## Dev notes
 Initially developed in 2002 with Delphi 6, now with Delphi 10.3.3 (Community Edition).
 Icons are generated at http://fontello.com/ . Use fontello.json for further modifications.
