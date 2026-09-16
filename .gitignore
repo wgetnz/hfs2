@@ -19,3 +19,6 @@ hfs.tpl
 hfs_project.tvsconfig
 data.res
 macros-log.html
+# Python bytecode (never commit - compiled from docstrings etc.)
+__pycache__/
+*.pyc
