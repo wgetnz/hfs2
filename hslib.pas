@@ -1155,7 +1155,8 @@ procedure ThttpConn.processInputBuffer();
   request.headers.text:=r;
 
   s:=getHeaderA('Range');
-  if ansiStartsText('bytes=',s) then
+  // multipart byte ranges (a-b,c-d) are not supported: a comma makes us ignore the header, full body is sent
+  if ansiStartsText('bytes=',s) and (pos(',',s) = 0) then
     begin
     delete(s,1,6);
     r:=chop('-',s);
@@ -1415,8 +1416,14 @@ case reply.mode of
   HRM_REPLY, HRM_REPLY_HEADER:
     if stream = NIL then
       sendHeader( replyHeader_code(404) )
-    else if (request.firstByte >= bytesFullBody) or (request.lastByte >= bytesFullBody) then
-      sendHeader( replyHeader_code(400) )
+    else if (request.firstByte >= bytesFullBody)
+      or ((request.firstByte < 0) and (request.lastByte = 0))
+      or ((request.lastByte >= 0) and (request.lastByte < request.firstByte)) then
+      begin // unsatisfiable range: RFC7233 wants 416 + current size, and no body
+      sendHeader( replyHeader_code(416)
+        + replyHeader_Str('Content-Range','bytes */'+intToStr(bytesFullBody)) );
+      FreeAndNil(stream); // no body must follow
+      end
     else if reply.header > '' then
         sendHeader()
     else if partialBodySize = fullBodySize then
@@ -1582,16 +1589,22 @@ try
       lastbyte:=bytesFullBody-1;
       end
     else
-      if lastByte < 0 then lastbyte:=bytesFullBody-1
+      begin
+      if firstByte < 0 then
+        begin
+        if lastByte > bytesFullBody then lastByte:=bytesFullBody;  // suffix "-M": clip M, not the end
+        firstByte:=bytesFullBody-lastByte;
+        lastByte:=bytesFullBody-1;  // was bytesFullBody: off-by-one, corrupting Content-Range and length
+        end
       else
-        if firstbyte < 0 then
-          begin
-          firstByte:=bytesFullBody-lastByte;
-          lastByte:=bytesFullBody;
-          end;
+        begin
+        if lastByte >= bytesFullBody then lastByte:=bytesFullBody-1;  // RFC7233: a too-large end is clipped
+        if lastByte < 0 then lastByte:=bytesFullBody-1;
+        end;
+      end;
 
   if (reply.firstByte > 0) and (reply.mode = HRM_REPLY) then
-    stream.Seek(request.firstByte, soBeginning);
+    stream.Seek(reply.firstByte, soBeginning);  // was request.firstByte: it is -1 for suffix ranges
 
   result:=TRUE;
 except end;
@@ -1661,6 +1674,7 @@ case code of
   404: result:='Not Found';
   405: result:='Method Not Allowed';
   413: result:='Payload Too Large';
+  416: result:='Range Not Satisfiable';
   500: result:='Internal Server Error';
   503: result:='Service Unavailable';
   else result:='';
