@@ -83,6 +83,7 @@
         <DCC_DebugInformation>0</DCC_DebugInformation>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+        <DCC_UnitSearchPath>Lib\ICS8\Source;Lib\TRegExpr\src;Lib\KryvichLocalizer;Lib\FastMM4;Lib\JCL\jcl\source\common;Lib\JCL\jcl\source\windows;Lib\JCL\jcl\source\include;$(DELPHI)\Lib\Win32\release;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
         <VerInfo_MinorVer>0</VerInfo_MinorVer>
