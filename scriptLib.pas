@@ -41,6 +41,7 @@ var
 
 function tryApplyMacrosAndSymbols(var txt:string; var md:TmacroData; removeQuotings:boolean=true):boolean;
 function macroQuote(s:string):string;
+function noMacrosAllowed(s:string):string; // 导出：供 main.pas 对上传结果里的请求派生值消毒（CVE-2024-23692 补全）
 function runScript(script:string; table:TstringDynArray=NIL; tpl_:Ttpl=NIL; f:Tfile=NIL; folder:Tfile=NIL; cd:TconnData=NIL):string;
 function runEventScript(event:string; table:TStringDynArray=NIL; cd:TconnData=NIL):string;
 procedure resetLog();
@@ -1707,11 +1708,11 @@ var
     else if name = '%lang%' then
       result:=stripChars(copy(md.cd.conn.getHeader('Accept-Language'),1,2), ['a'..'z','A'..'Z'], TRUE)
     else if name = '%url%' then
-      result:=macroQuote(md.cd.conn.request.url)
+      result:=noMacrosAllowed(md.cd.conn.request.url) // 请求 URL 完全可控，macroQuote 挡不住 %symbol% 展开
     else if name = '%user%' then
-      result:=macroQuote(usr)
+      result:=noMacrosAllowed(usr)
     else if name = '%password%' then
-      result:=macroQuote(md.cd.conn.request.pwd)
+      result:=noMacrosAllowed(md.cd.conn.request.pwd)
     else if name = '%loggedin%' then
       result:=if_(usr>'', tpl['loggedin'])
     else if name = '%login-link%' then

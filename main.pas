@@ -3891,12 +3891,12 @@ var
   for i:=0 to length(data.uploadResults)-1 do
     with data.uploadResults[i] do
       files:=files+xtpl(tpl2use[ if_(reason='','upload-success','upload-failed') ],[
-        '%item-name%', htmlEncode(macroQuote(fn)),
+        '%item-name%', noMacrosAllowed(htmlEncode(fn)), // 先 htmlEncode 再消毒，避免 & 被二次转义（CVE-2024-23692 补全）
         '%item-url%', macroQuote(encodeURL(fn)),
         '%item-size%', smartsize(size),
-        '%item-resource%', f.resource+'\'+fn,
+        '%item-resource%', noMacrosAllowed(f.resource+'\'+fn), // 主注入口：原为裸拼接，未授权 RCE 根因
         '%idx%', intToStr(i+1),
-        '%reason%', reason,
+        '%reason%', noMacrosAllowed(reason),
         '%speed%', intToStr(speed div 1000), // legacy
         '%smart-speed%', smartsize(speed)
       ]);
